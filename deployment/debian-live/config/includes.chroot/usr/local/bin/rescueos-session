@@ -1,0 +1,16 @@
+#!/bin/sh
+# RescueOS dedicated kiosk X session.
+# No XFCE panel, no desktop icons — Chromium fills the entire screen.
+set -eu
+
+# Disable screen blanking and power management
+xset s off 2>/dev/null || true
+xset -dpms 2>/dev/null || true
+xset s noblank 2>/dev/null || true
+
+# Disable any screen savers
+if command -v xscreensaver-command >/dev/null 2>&1; then
+  xscreensaver-command -deactivate 2>/dev/null || true
+fi
+
+exec /usr/local/bin/rescueos-kiosk

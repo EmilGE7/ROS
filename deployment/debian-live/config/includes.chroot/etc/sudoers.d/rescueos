@@ -1,0 +1,8 @@
+# RescueOS: allow the live 'user' to run network management tools as root
+# and to restart the rescueos service - required for hotspot and diagnostics
+user ALL=(root) NOPASSWD: /usr/local/bin/rescueos-network
+user ALL=(root) NOPASSWD: /bin/systemctl restart rescueos
+user ALL=(root) NOPASSWD: /bin/systemctl stop rescueos
+user ALL=(root) NOPASSWD: /bin/systemctl start rescueos
+user ALL=(root) NOPASSWD: /sbin/shutdown
+user ALL=(root) NOPASSWD: /sbin/reboot

@@ -1,0 +1,11 @@
+# Minimal branded splash. Plymouth script API.
+Window.SetBackgroundTopColor(0.02, 0.04, 0.08);
+Window.SetBackgroundBottomColor(0.02, 0.04, 0.08);
+title = Image.Text("RescueOS", 1.0, 1.0, 1.0);
+title_sprite = Sprite(title);
+title_sprite.SetX(Window.GetWidth() / 2 - title.GetWidth() / 2);
+title_sprite.SetY(Window.GetHeight() / 2 - title.GetHeight() / 2 - 20);
+tagline = Image.Text("BOOT. CONNECT. RESCUE.", 0.65, 0.8, 0.9);
+tagline_sprite = Sprite(tagline);
+tagline_sprite.SetX(Window.GetWidth() / 2 - tagline.GetWidth() / 2);
+tagline_sprite.SetY(Window.GetHeight() / 2 + 20);

@@ -1,0 +1,45 @@
+# RescueOS — Debian Live package list
+# Desktop foundation (hidden — used only as Chromium host)
+xfce4
+lightdm
+lightdm-gtk-greeter
+dbus-x11
+
+# Kiosk browser
+chromium
+
+# Networking
+network-manager
+wpasupplicant
+iw
+iproute2
+iputils-ping
+
+# Firewall
+nftables
+
+# Utilities
+curl
+ca-certificates
+usbutils
+pciutils
+rfkill
+sqlite3
+xterm
+sudo
+
+# Fonts
+fonts-dejavu-core
+fonts-noto-core
+
+# Boot splash
+plymouth
+plymouth-themes
+
+# System
+live-config
+live-boot
+systemd
+systemd-timesyncd
+locales
+console-setup

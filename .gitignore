@@ -1,0 +1,47 @@
+# Generated build outputs
+/build/
+/dist/
+/out/
+*.iso
+*.img
+*.img.gz
+*.qcow2
+*.vdi
+*.vmdk
+*.ova
+*.deb
+*.rpm
+*.log
+
+# Node dependencies and local runtime data
+node_modules/
+**/node_modules/
+*.sqlite
+*.sqlite3
+*.db
+
+# Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials.json
+secrets.json
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

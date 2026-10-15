@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=RescueOS
+Description=RescueOS boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/rescueos
+ScriptFile=/usr/share/plymouth/themes/rescueos/rescueos.script

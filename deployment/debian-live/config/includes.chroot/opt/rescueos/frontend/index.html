@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RescueOS | Emergency Operations</title>
+  
+  <!-- Bundled Local Assets (100% Offline, Zero External CDNs) -->
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Status & Network Bar -->
+  <header class="top-bar">
+    <div class="brand-section">
+      <a href="#" class="brand-logo" onclick="showTab('dashboard')">
+        <span class="brand-mark" aria-hidden="true"><span class="brand-mark-core"></span></span><span class="brand-word">RescueOS</span>
+      </a>
+      <span class="station-pill" id="stationName">LOCAL STATION</span>
+    </div>
+
+    <div class="top-actions">
+      <div class="status-badge online" id="liveIndicator">
+        <span class="pulse"></span> LOCAL ONLINE
+      </div>
+      <div class="lan-pill" id="lanPill">
+        LOCAL NETWORK
+      </div>
+      <div id="userStatusPill">
+        <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Staff sign in</button>
+      </div>
+      <button class="btn btn-red btn-sm" onclick="showTab('citizen')">Send SOS</button>
+    </div>
+  </header>
+
+  <!-- Active Simulation Notice Banner -->
+  <div id="simActiveBanner" class="sim-banner hidden">
+    <span id="simStatusText">⚠️ [SIMULATION MODE ACTIVE] Training Exercise in Progress</span>
+    <div>
+      <button class="btn btn-dark btn-sm" onclick="pauseSimulation()">Pause</button>
+      <button class="btn btn-dark btn-sm" onclick="resetSimulation()">Reset Simulation</button>
+    </div>
+  </div>
+
+  <!-- Critical Emergency Broadcast Top Banner -->
+  <div id="topBroadcastBanner" class="broadcast-banner hidden">
+    <span id="topBroadcastMsg">🚨 CRITICAL BROADCAST ALERT</span>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="flashBanner" class="broadcast-banner hidden" style="background:#0c4a6e;border-color:#38bdf8"></div>
+
+  <div class="app-shell">
+  <!-- Primary navigation -->
+  <nav class="nav-tabs-wrapper" aria-label="Primary navigation">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="dashboard" aria-current="page" onclick="showTab('dashboard')">
+        Command Center <span class="tab-badge" id="badgeSos">0</span>
+      </button>
+      <button class="nav-tab" data-tab="citizen" onclick="showTab('citizen')">
+        Citizen SOS
+      </button>
+      <button class="nav-tab" data-tab="volunteer" onclick="showTab('volunteer')">
+        Volunteer Operations <span class="tab-badge blue" id="badgeVol">0</span>
+      </button>
+      <button class="nav-tab" data-tab="medical" onclick="showTab('medical')">
+        Medical Triage <span class="tab-badge" id="badgeMed">0</span>
+      </button>
+      <button class="nav-tab" data-tab="shelter" onclick="showTab('shelter')">
+        Shelters
+      </button>
+      <button class="nav-tab" data-tab="resources" onclick="showTab('resources')">
+        Resources
+      </button>
+      <button class="nav-tab" data-tab="incidents" onclick="showTab('incidents')">
+        Incidents <span class="tab-badge amber" id="badgeInc">0</span>
+      </button>
+      <button class="nav-tab" data-tab="missing" onclick="showTab('missing')">
+        Missing Persons
+      </button>
+      <button class="nav-tab" data-tab="chat" onclick="showTab('chat')">
+        Local Chat
+      </button>
+      <button class="nav-tab" data-tab="network" onclick="showTab('network')">
+        Network
+      </button>
+      <button class="nav-tab" data-tab="system" onclick="showTab('system')">
+        System
+      </button>
+      <button class="nav-tab" data-tab="database" onclick="showTab('database')">
+        Database
+      </button>
+      <button class="nav-tab" data-tab="timeline" onclick="showTab('timeline')">
+        Incident Timeline
+      </button>
+      <button class="nav-tab" data-tab="simulation" onclick="showTab('simulation')">
+        Simulation
+      </button>
+      <button class="nav-tab" data-tab="sync" onclick="showTab('sync')">
+        Station Sync &amp; USB
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main View Container -->
+  <main class="app-container">
+
+    <!-- ===================================================================== -->
+    <!-- 1. COMMAND CENTER (Step 7) -->
+    <!-- ===================================================================== -->
+    <section id="dashboard">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow">RESCUEOS / OPERATIONS</div>
+          <h1>Command Center</h1>
+          <p>Local emergency coordination and response overview.</p>
+        </div>
+        <div class="heading-meta">
+          <span class="heading-dot"></span>
+          <span>Offline-ready operations</span>
+        </div>
+      </div>
+      <!-- High-Level Operational Metrics -->
+      <div class="stats-grid">
+        <div class="stat-card critical">
+          <div class="stat-label">Active SOS</div>
+          <div class="stat-value" id="statActiveSos">0</div>
+        </div>
+        <div class="stat-card critical">
+          <div class="stat-label">Critical Priority</div>
+          <div class="stat-value" id="statCritical">0</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-label">Active Hazards</div>
+          <div class="stat-value" id="statIncidents">0</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-label">Rescue Teams</div>
+          <div class="stat-value" id="statVolunteers">0</div>
+        </div>
+        <div class="stat-card info">
+          <div class="stat-label">Shelter Occupancy</div>
+          <div class="stat-value" id="statShelterOcc">0%</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-label">Low Stock Items</div>
+          <div class="stat-value" id="statResources">0</div>
+        </div>
+        <div class="stat-card info">
+          <div class="stat-label">Missing Persons</div>
+          <div class="stat-value" id="statMissing">0</div>
+        </div>
+        <div class="stat-card critical">
+          <div class="stat-label">Triage Waiting</div>
+          <div class="stat-value" id="statMedical">0</div>
+        </div>
+      </div>
+
+      <!-- Command Center Layout: Feed & Dispatch Tools -->
+      <div class="dual-layout">
+        <!-- Live Incident Dispatch Feed -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">🚨 Live Disaster Incident Feed</h2>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm filter-btn" data-filter="ALL" onclick="setSosFilter('ALL')">All</button>
+              <button class="btn btn-dark btn-sm filter-btn" data-filter="CRITICAL" onclick="setSosFilter('CRITICAL')">Critical</button>
+              <button class="btn btn-dark btn-sm filter-btn" data-filter="ACTIVE" onclick="setSosFilter('ACTIVE')">Active</button>
+              <button class="btn btn-dark btn-sm filter-btn" data-filter="RESOLVED" onclick="setSosFilter('RESOLVED')">Resolved</button>
+              <button class="btn btn-outline btn-sm" id="btnToggleSim" onclick="toggleSimData()">Simulation Data: Visible</button>
+            </div>
+          </div>
+          <div id="sosList"></div>
+        </div>
+
+        <!-- Sidebar: Broadcast & Quick Timeline -->
+        <div>
+          <!-- Official Emergency Broadcast Box -->
+          <div class="panel">
+            <h2 class="panel-title">📢 Issue Official Broadcast</h2>
+            <p class="panel-sub">Transmits priority emergency alert to all local network devices.</p>
+            <div class="form-group">
+              <input id="annTitle" class="form-control" placeholder="Announcement Title (e.g., Sector B Evacuation Order)">
+            </div>
+            <div class="form-group">
+              <textarea id="annMessage" class="form-control" placeholder="Precise emergency directives and instructions..."></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <select id="annPriority" class="form-control">
+                  <option value="CRITICAL">Priority: CRITICAL (Audio/Banner Alert)</option>
+                  <option value="HIGH" selected>Priority: HIGH</option>
+                  <option value="NORMAL">Priority: NORMAL</option>
+                  <option value="INFO">Priority: INFO</option>
+                </select>
+              </div>
+              <button class="btn btn-red" onclick="submitAnnouncement()">📢 Broadcast Now</button>
+            </div>
+            
+            <h3 style="font-size:14px;color:#fff;margin:16px 0 8px">Recent Station Broadcasts</h3>
+            <div id="announcementsList"></div>
+          </div>
+
+          <!-- Quick Audit Activity -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">🛡️ Station Audit Trail</h2>
+              <button class="btn btn-dark btn-sm" onclick="showTab('sync')">View All</button>
+            </div>
+            <div id="auditFeed" style="max-height:280px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 2. CITIZEN SOS & RESCUE IDENTITY (Step 6 & 15) -->
+    <!-- ===================================================================== -->
+    <section id="citizen" class="hidden">
+      <div class="dual-layout">
+        <!-- Emergency SOS Form -->
+        <div class="panel">
+          <h2 class="panel-title" style="color:var(--red)">🆘 Submit Emergency SOS</h2>
+          <p class="panel-sub">Direct local distress signal. Stored directly on RescueOS and routed to field rescue dispatch.</p>
+          
+          <div class="form-group">
+            <label class="form-label">Your Full Name / Household Head *</label>
+            <input id="sosName" class="form-control" placeholder="e.g. Ramesh Kumar">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Emergency Category *</label>
+              <select id="sosType" class="form-control">
+                <option value="FLOOD">🌊 FLOOD — Water Rising / Stranded</option>
+                <option value="MEDICAL">🩹 MEDICAL — Severe Injury / Trauma</option>
+                <option value="TRAPPED">🏚️ TRAPPED — Structural Debris / Void</option>
+                <option value="FIRE">🔥 FIRE — Active Flame / Smoke Inhalation</option>
+                <option value="FOOD_WATER">💧 FOOD_WATER — Starvation / Dehydration</option>
+                <option value="MISSING_PERSON">🔍 MISSING_PERSON — Lost Child / Relative</option>
+                <option value="STRUCTURAL_DAMAGE">⚠️ STRUCTURAL_DAMAGE — Building Collapse Risk</option>
+                <option value="OTHER">🚨 OTHER — General Crisis</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Number of People Affected *</label>
+              <input id="sosPeople" type="number" min="1" max="500" value="1" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Urgency Priority</label>
+            <select id="sosPriority" class="form-control">
+              <option value="CRITICAL">🔴 CRITICAL — Life Threatening / Immediate Danger</option>
+              <option value="HIGH" selected>🟠 HIGH — Urgent Assistance Needed</option>
+              <option value="MEDIUM">🔵 MEDIUM — Stable But Needing Evacuation/Aid</option>
+              <option value="LOW">⚪ LOW — General Assistance</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Specific Location / Landmark *</label>
+            <input id="sosLocation" class="form-control" placeholder="e.g. Plot 14, Riverside Colony, Sector B (Behind Green Water Tank)">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">What is happening? (Detailed description) *</label>
+            <textarea id="sosEmergency" class="form-control" placeholder="Describe the hazard, injuries, water level, or special needs (elderly, infants, medicines required)..."></textarea>
+          </div>
+
+          <button class="btn btn-red btn-lg" style="width:100%" onclick="submitSOS()">
+            🚨 SEND EMERGENCY SOS NOW
+          </button>
+        </div>
+
+        <!-- Rescue ID & QR Lookup -->
+        <div>
+          <div class="panel">
+            <h2 class="panel-title">🔐 Rescue Identity &amp; QR Lookup</h2>
+            <p class="panel-sub">
+              Every SOS receives a secure random identifier (e.g. <code>RSC-XXXXXXXX</code>).
+              Personal details are never placed directly into the QR for privacy.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">Search / Scan Rescue ID</label>
+              <div style="display:flex;gap:8px">
+                <input id="inputQrSearch" class="form-control" placeholder="Enter Rescue ID (e.g. RSC-A8F29C1B)">
+                <button class="btn btn-primary" onclick="searchQrId()">Lookup</button>
+              </div>
+            </div>
+
+            <div style="background:#090e17;border:1px dashed var(--border);border-radius:8px;padding:16px;text-align:center">
+              <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">
+                Submitting an SOS generates a printable Rescue Badge with verified cryptographic identifier.
+              </p>
+              <button class="btn btn-dark" onclick="viewQrModal('RSC-A8F29C1B')">Preview Sample Card</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 3. VOLUNTEER OPERATIONS (Step 9) -->
+    <!-- ===================================================================== -->
+    <section id="volunteer" class="hidden">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">🛟 Volunteer Rescue Operations</h2>
+            <p class="panel-sub">Accept dispatch orders, acknowledge assignments, report field status, and complete rescues.</p>
+          </div>
+        </div>
+        <div id="volunteerTaskList"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 4. MEDICAL TRIAGE SYSTEM (Step 10) -->
+    <!-- ===================================================================== -->
+    <section id="medical" class="hidden">
+      <div class="dual-layout">
+        <!-- Medical Cases List -->
+        <div class="panel">
+          <h2 class="panel-title">🏥 Field Medical Triage &amp; Clinical Cases</h2>
+          <p class="panel-sub">Triage priority categories: RED (Immediate), YELLOW (Delayed), GREEN (Minor), BLACK (Expectant).</p>
+          <div id="medicalCasesList"></div>
+        </div>
+
+        <!-- Add Clinical Intake -->
+        <div class="panel">
+          <h2 class="panel-title">➕ Clinical Intake Record</h2>
+          <div class="form-group">
+            <label class="form-label">Patient Name / Identifier *</label>
+            <input id="medPatient" class="form-control" placeholder="e.g. Sunita Patel">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Triage Urgency Priority *</label>
+            <select id="medPriority" class="form-control">
+              <option value="RED_IMMEDIATE">🔴 RED — Immediate Resuscitation / Surgical Threat</option>
+              <option value="YELLOW_DELAYED" selected>🟡 YELLOW — Delayed Serious (Urgent Attention)</option>
+              <option value="GREEN_MINOR">🟢 GREEN — Minor Walking Wounded</option>
+              <option value="BLACK_EXPECTANT">⚫ BLACK — Deceased / Expectant</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clinical Symptoms &amp; Trauma *</label>
+            <textarea id="medSymptoms" class="form-control" placeholder="Head laceration, hypothermia, fractures, vital signs..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vitals Summary</label>
+            <input id="medVitals" class="form-control" placeholder="BP: 110/70, Pulse: 88, SpO2: 96%">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Medical Resource Requests</label>
+            <input id="medSupplies" class="form-control" placeholder="e.g. Pediatric Saline, Splints, Sterile Bandages">
+          </div>
+          <button class="btn btn-green" onclick="submitMedicalIntake()">Record Medical Intake</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 5. SHELTERS MANAGEMENT (Step 11) -->
+    <!-- ===================================================================== -->
+    <section id="shelter" class="hidden">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">🏠 Emergency Relief Shelters</h2>
+          <p class="panel-sub">Real-time shelter capacity tracking, supply balances, check-in, and occupancy calculation.</p>
+        </div>
+      </div>
+      <div class="dual-layout" id="sheltersGrid"></div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 6. RESOURCE MANAGEMENT (Step 12) -->
+    <!-- ===================================================================== -->
+    <section id="resources" class="hidden">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">📦 Disaster Logistics &amp; Resource Stock</h2>
+            <p class="panel-sub">Tracks potable water, rations, medical trauma kits, blankets, fuel, and supplies with auto threshold alerts.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Resource Name</th>
+                <th>Category</th>
+                <th>Shelter / Depot</th>
+                <th>Current Stock</th>
+                <th>Min Threshold</th>
+                <th>Status</th>
+                <th>Stock Movement</th>
+              </tr>
+            </thead>
+            <tbody id="resourcesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 7. INCIDENT REPORTING (Step 14) -->
+    <!-- ===================================================================== -->
+    <section id="incidents" class="hidden">
+      <div class="dual-layout">
+        <!-- Incidents List -->
+        <div class="panel">
+          <h2 class="panel-title">⚠️ Disaster Hazard Reports</h2>
+          <div id="incidentsFeed"></div>
+        </div>
+
+        <!-- Report Incident -->
+        <div class="panel">
+          <h2 class="panel-title">➕ Report New Hazard / Roadblock</h2>
+          <div class="form-group">
+            <label class="form-label">Hazard Headline *</label>
+            <input id="incTitle" class="form-control" placeholder="e.g. Submerged Bridge or Power Line Down">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Incident Type *</label>
+              <select id="incType" class="form-control">
+                <option value="ROAD_BLOCK">ROAD_BLOCK (Impassable Route)</option>
+                <option value="FLOOD">FLOOD (Water Surge)</option>
+                <option value="FIRE">FIRE (Active Blaze / Gas Leak)</option>
+                <option value="LANDSLIDE">LANDSLIDE (Mudflow / Rockfall)</option>
+                <option value="STRUCTURAL_DAMAGE">STRUCTURAL_DAMAGE (Building Risk)</option>
+                <option value="INFRASTRUCTURE">INFRASTRUCTURE (Grid / Water Supply)</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hazard Severity *</label>
+              <select id="incSeverity" class="form-control">
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH" selected>HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location / Coordinates *</label>
+            <input id="incLocation" class="form-control" placeholder="e.g. River Bridge Connecting Sector A &amp; B">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description &amp; Observations *</label>
+            <textarea id="incDescription" class="form-control" placeholder="Water height, current speed, physical barriers placed..."></textarea>
+          </div>
+          <button class="btn btn-amber" onclick="submitIncident()">Submit Hazard Report</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 8. MISSING PERSONS REGISTRY (Step 13) -->
+    <!-- ===================================================================== -->
+    <section id="missing" class="hidden">
+      <div class="dual-layout">
+        <!-- Missing Persons Grid -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Missing Persons Registry</h2>
+          </div>
+          <div class="form-group">
+            <input id="inputMissingSearch" class="form-control" placeholder="Search missing persons by name, clothing, or location..." oninput="searchMissing(this.value)">
+          </div>
+          <div class="dual-layout" id="missingPersonsGrid"></div>
+        </div>
+
+        <!-- Register Missing Person -->
+        <div class="panel">
+          <h2 class="panel-title">➕ Register Missing Individual</h2>
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input id="mpName" class="form-control" placeholder="e.g. Aarav Deshmukh">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Age</label>
+              <input id="mpAge" type="number" class="form-control" placeholder="e.g. 9">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select id="mpGender" class="form-control">
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+                <option value="UNSPECIFIED">Unspecified</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Seen Location &amp; Time *</label>
+            <input id="mpLocation" class="form-control" placeholder="e.g. Sector B Riverside School ground, 08:30 AM">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Clothing &amp; Identifying Marks</label>
+            <textarea id="mpFeatures" class="form-control" placeholder="Blue school uniform shirt, yellow raincoat, birthmark..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Family Contact Info</label>
+            <input id="mpContact" class="form-control" placeholder="Parent / Relative name and phone number">
+          </div>
+          <button class="btn btn-blue" onclick="submitMissingPerson()">Register Missing Person</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 9. LOCAL EMERGENCY CHAT (Step 17) -->
+    <!-- ===================================================================== -->
+    <section id="chat" class="hidden">
+      <div class="dual-layout">
+        <!-- Channel Picker -->
+        <div class="panel" style="height:fit-content">
+          <h2 class="panel-title" style="margin-bottom:12px">📻 Radio Channels</h2>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-outline chat-channel-btn active" data-channel="GENERAL" onclick="selectChatChannel('GENERAL')">
+              📢 #GENERAL (All Responders)
+            </button>
+            <button class="btn btn-outline chat-channel-btn" data-channel="COMMAND" onclick="selectChatChannel('COMMAND')">
+              🎖️ #COMMAND (Coordination &amp; Leads)
+            </button>
+            <button class="btn btn-outline chat-channel-btn" data-channel="VOLUNTEERS" onclick="selectChatChannel('VOLUNTEERS')">
+              🛟 #VOLUNTEERS (Field Teams)
+            </button>
+            <button class="btn btn-outline chat-channel-btn" data-channel="MEDICAL" onclick="selectChatChannel('MEDICAL')">
+              🏥 #MEDICAL (Triage &amp; Clinical)
+            </button>
+          </div>
+          <p class="panel-sub" style="margin-top:16px">
+            100% offline local Wi-Fi mesh chat. Real-time peer broadcast without internet or cellular connectivity.
+          </p>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-window">
+          <div class="chat-header">
+            <strong id="chatChannelHeader">#GENERAL Channel</strong>
+            <span class="status-badge online"><span class="pulse"></span> LIVE PUSH</span>
+          </div>
+          <div class="chat-messages" id="chatMessagesFeed"></div>
+          <div class="chat-footer">
+            <input id="chatInput" class="form-control" placeholder="Type emergency radio transmission..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+            <button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="system" class="hidden">
+      <div class="page-heading"><div><h1>System</h1><p>Host operating system, processor, memory, and storage status.</p></div><button class="btn btn-dark btn-sm" onclick="fetchSystemInfo()">Refresh</button></div>
+      <div class="panel"><div id="systemInfo" aria-live="polite">Loading system information…</div></div>
+    </section>
+
+    <!-- Read-only database browser -->
+    <section id="database" class="hidden">
+      <div class="page-heading">
+        <div><h1>Database</h1><p>Read-only SQLite inspection. Administrator sign-in is required.</p></div>
+        <div id="databaseStatus" aria-live="polite">Sign in as administrator to connect.</div>
+      </div>
+      <div class="dual-layout database-layout">
+        <div class="panel"><h2 class="panel-title">Tables</h2><div id="databaseTables">Sign in as administrator to list tables.</div></div>
+        <div class="panel">
+          <div class="panel-header"><h2 class="panel-title" id="databaseTableTitle">Select a table</h2><span id="databaseQueryTime" class="panel-sub"></span></div>
+          <div id="databaseSchema"></div>
+          <div id="databaseRows" class="table-responsive"></div>
+          <div class="database-pagination"><button class="btn btn-dark btn-sm" onclick="pageDatabase(-1)">Previous</button><span id="databasePage"></span><button class="btn btn-dark btn-sm" onclick="pageDatabase(1)">Next</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Network status and diagnostics -->
+    <section id="network" class="hidden">
+      <div class="page-heading">
+        <div><h1>Network</h1><p>Current interface addresses and connectivity checks.</p></div>
+        <button class="btn btn-primary" onclick="runNetworkDiagnostics()">Run diagnostics</button>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">Interfaces</h2><button class="btn btn-dark btn-sm" onclick="fetchNetworkInfo()">Refresh</button></div>
+        <div id="networkInterfaces" aria-live="polite">Loading network status…</div>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <h2 class="panel-title">Diagnostics</h2>
+        <div id="networkDiagnostics" aria-live="polite">Run diagnostics to check interface, route, DNS, and external connectivity.</div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 11. DISASTER TIMELINE (Step 20) -->
+    <!-- ===================================================================== -->
+    <section id="timeline" class="hidden">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">🕒 Unified Disaster Operational Timeline</h2>
+          <button class="btn btn-dark btn-sm" onclick="renderTimeline()">Refresh Milestones</button>
+        </div>
+        <p class="panel-sub">Chronological aggregation of all real and simulated disaster events.</p>
+        <div id="timelineFeed"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 12. DISASTER SIMULATION MODE (Step 19 — Core Competition Feature) -->
+    <!-- ===================================================================== -->
+    <section id="simulation" class="hidden">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">⚡ Disaster Simulation Engine</h2>
+            <p class="panel-sub">
+              Dynamic multi-phase disaster scenarios for training and stress-testing offline operational response.
+            </p>
+          </div>
+          <span class="badge badge-simulation">TRAINING ENGINE</span>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+          <button class="btn btn-red" onclick="startSimulation('FLOOD')">🌊 Run Flood Surge Scenario</button>
+          <button class="btn btn-amber" onclick="startSimulation('EARTHQUAKE')">🏚️ Run M6.5 Earthquake Scenario</button>
+          <button class="btn btn-primary" onclick="startSimulation('LANDSLIDE')">⛰️ Run Hillside Landslide Scenario</button>
+          <button class="btn btn-blue" onclick="startSimulation('CYCLONE')">🌀 Run Super Cyclone Scenario</button>
+          <button class="btn btn-red" onclick="startSimulation('FIRE')">🔥 Run Urban Wildfire Scenario</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="btn btn-dark" onclick="pauseSimulation()">⏸️ Pause</button>
+          <button class="btn btn-dark" onclick="resumeSimulation()">▶️ Resume</button>
+          <button class="btn btn-dark" onclick="resetSimulation()">🔄 Clear Simulation Records</button>
+        </div>
+
+        <div style="background:#090e17;border:1px solid var(--border);border-radius:8px;padding:16px">
+          <h3 style="font-size:14px;color:#fff;margin-bottom:8px">Simulation Engine Architecture</h3>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:6px">
+            • All simulated records are cleanly tagged with <code>is_simulation = 1</code> and distinct badges.
+          </p>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:6px">
+            • Real operational records are never mixed or overwritten.
+          </p>
+          <p style="font-size:13px;color:var(--text-muted)">
+            • Real-time SSE pushes simulated events to all connected mobile and desktop stations simultaneously.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 13. STATION SYNC & USB MIGRATION (Step 26 & 27) -->
+    <!-- ===================================================================== -->
+    <section id="sync" class="hidden">
+      <div class="dual-layout">
+        <!-- Disaster Package Export / Import -->
+        <div class="panel">
+          <h2 class="panel-title">💾 USB Disaster Package Synchronization</h2>
+          <p class="panel-sub">
+            Synchronize between isolated RescueOS stations via physical USB flash drive or ad-hoc local transfer.
+          </p>
+          <div style="margin:16px 0">
+            <button class="btn btn-primary" onclick="exportDisasterPackage()">
+              📥 Export Signed Disaster Package (.json)
+            </button>
+          </div>
+          <div style="margin:16px 0">
+            <label class="form-label">Merge Incoming Disaster Package from USB:</label>
+            <input type="file" accept=".json" class="form-control" onchange="importDisasterPackage(this)">
+          </div>
+          <p style="font-size:12px;color:var(--text-dim)">
+            Packages include SHA-256 tamper-evident integrity checksums and timestamp-based idempotent merging.
+          </p>
+        </div>
+
+        <!-- LoRa Mesh Transport Adapter Status -->
+        <div class="panel">
+          <h2 class="panel-title">📡 Hardware &amp; Transport Adapters</h2>
+          <div style="background:#090e17;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <strong>LoRa Low-Bandwidth Mesh</strong>
+              <span class="badge badge-low">FUTURE EXTENSION</span>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted)">
+              Status: <code>UNPLUGGED / NO PHYSICAL HARDWARE</code><br>
+              Binary Packet Framing: Ready for SX1262 / SX1276 UART bridge.<br>
+              Zero fake hardware claims. System relies on built-in Wi-Fi / Ethernet.
+            </p>
+          </div>
+
+          <div style="background:#090e17;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px">
+            <strong>Detected Local Network Interfaces:</strong>
+            <div id="lanListInfo" style="font-size:12px;margin-top:6px;line-height:1.8"></div>
+          </div>
+
+          <button class="btn btn-red btn-sm" onclick="resetDemoData()">
+            ⚡ Reset Demo Dataset to Default
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL: RESCUE ID & PRINTABLE BADGE (Step 15) -->
+  <!-- ======================================================================= -->
+  <div id="modalQrOverlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 id="modalQrTitle" style="color:#fff">Rescue ID Badge</h3>
+        <button class="btn btn-dark btn-sm" onclick="closeModal('modalQrOverlay')">✕</button>
+      </div>
+
+      <div class="printable-area">
+        <div class="rescue-card-print">
+          <div class="rescue-card-header">🚨 RESCUEOS EMERGENCY ID</div>
+          <img id="modalQrImage" src="" alt="Rescue QR" style="width:160px;height:160px;margin:8px auto;display:block">
+          <div class="rescue-card-id" id="printRescueId">RSC-XXXXXXXX</div>
+          <div style="font-size:14px;font-weight:700;margin:4px 0" id="printRequesterName">Survivor Name</div>
+          <div style="font-size:12px;color:#333">Status: <strong id="printStatus">NEW</strong> · <span id="printCategory">GENERAL</span></div>
+          <div style="font-size:11px;color:#555;margin-top:4px" id="printLocation">Location Masked</div>
+          <div style="font-size:10px;color:#777;margin-top:8px">Issued: <span id="printTimestamp"></span> · Station Alpha Verified</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end">
+        <button class="btn btn-primary" onclick="printRescueCard()">🖨️ Print Emergency Card</button>
+        <button class="btn btn-dark" onclick="closeModal('modalQrOverlay')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL: LOGIN & QUICK DEMO ROLE SWITCHER (Step 5 & 28) -->
+  <!-- ======================================================================= -->
+  <div id="loginModalOverlay" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="color:#fff">🔑 Emergency Personnel Authentication</h3>
+        <button class="btn btn-dark btn-sm" onclick="closeModal('loginModalOverlay')">✕</button>
+      </div>
+
+      <p class="panel-sub">
+        Sign in to access authorized roles (Coordinator, Medical Officer, Volunteer Team, Administrator).
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input id="loginUsername" class="form-control" placeholder="Enter username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="loginPassword" type="password" class="form-control" placeholder="Enter password">
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:16px" onclick="submitLogin()">Sign In</button>
+
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <label class="form-label" style="margin-bottom:8px">⚡ 1-Click Competition Role Switcher (Password: <code>rescueos2026</code>):</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="btn btn-dark btn-sm" onclick="quickRoleLogin('admin')">🎖️ Admin (Director)</button>
+          <button class="btn btn-dark btn-sm" onclick="quickRoleLogin('coordinator')">📋 Coordinator (Dispatch)</button>
+          <button class="btn btn-dark btn-sm" onclick="quickRoleLogin('doctor1')">🏥 Doctor (Medical Lead)</button>
+          <button class="btn btn-dark btn-sm" onclick="quickRoleLogin('volunteer1')">🛟 Volunteer (Team 01)</button>
+          <button class="btn btn-dark btn-sm" onclick="quickRoleLogin('volunteer2')">🛟 Volunteer (Team 02)</button>
+          <button class="btn btn-dark btn-sm" onclick="quickRoleLogin('citizen1')">👤 Citizen (Resident)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>

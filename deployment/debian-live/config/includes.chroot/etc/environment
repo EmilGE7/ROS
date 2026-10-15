@@ -1,0 +1,3 @@
+RESCUEOS_DATA_DIR=/var/lib/rescueos
+NODE_ENV=production
+PATH=/usr/local/lib/nodejs/node-v22.14.0-linux-x64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

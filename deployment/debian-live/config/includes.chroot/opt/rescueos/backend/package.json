@@ -1,0 +1,10 @@
+{
+  "name": "rescueos-backend",
+  "version": "1.0.0",
+  "description": "RescueOS — Portable Offline Disaster Communication & Coordination Operating System",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/api.test.js"
+  }
+}

@@ -1,0 +1,48 @@
+#!/bin/sh
+# RescueOS Kiosk Launcher
+# Waits for the local backend to become healthy, then opens Chromium full-screen.
+set -eu
+
+URL="http://127.0.0.1:8080"
+HEALTH_URL="${URL}/api/health"
+MAX_WAIT=90
+
+echo "[RescueOS Kiosk] Waiting for backend at ${HEALTH_URL} ..."
+
+i=0
+while [ "$i" -lt "$MAX_WAIT" ]; do
+  if curl --fail --silent --max-time 2 "$HEALTH_URL" >/dev/null 2>&1; then
+    echo "[RescueOS Kiosk] Backend is ready (waited ${i}s)."
+    break
+  fi
+  i=$((i + 1))
+  sleep 1
+done
+
+if [ "$i" -ge "$MAX_WAIT" ]; then
+  echo "[RescueOS Kiosk] WARNING: Backend did not respond within ${MAX_WAIT}s. Launching anyway." >&2
+fi
+
+# Chromium user data dir (writable tmpfs)
+CHROME_DATA="/tmp/rescueos-chromium"
+mkdir -p "$CHROME_DATA"
+
+exec chromium \
+  --kiosk \
+  --no-first-run \
+  --disable-infobars \
+  --disable-session-crashed-bubble \
+  --disable-features=Translate,MediaRouter \
+  --noerrdialogs \
+  --disable-prompt-on-repost \
+  --disable-gpu \
+  --disable-software-rasterizer \
+  --disable-background-networking \
+  --disable-sync \
+  --disable-default-apps \
+  --disable-extensions \
+  --disable-component-update \
+  --autoplay-policy=no-user-gesture-required \
+  --user-data-dir="$CHROME_DATA" \
+  --window-size=1920,1080 \
+  "$URL"

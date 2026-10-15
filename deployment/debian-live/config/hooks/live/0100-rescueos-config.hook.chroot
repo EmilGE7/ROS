@@ -1,0 +1,136 @@
+#!/bin/sh
+set -e
+
+echo "=== RescueOS chroot configuration hook ==="
+
+# --- Verify pinned Node.js runtime ---
+NODE_BIN="/usr/local/lib/nodejs/node-v22.14.0-linux-x64/bin/node"
+if [ ! -x "$NODE_BIN" ]; then
+  echo "RescueOS: ERROR: pinned Node.js runtime is missing at $NODE_BIN" >&2
+  exit 1
+fi
+echo "Node.js version: $($NODE_BIN --version)"
+
+# --- Create system user/group ---
+getent group rescueos >/dev/null || groupadd --system rescueos
+id rescueos >/dev/null 2>&1 || useradd --system --gid rescueos \
+  --home-dir /var/lib/rescueos --create-home --shell /usr/sbin/nologin rescueos
+
+# --- Set application permissions ---
+chown -R root:rescueos /opt/rescueos
+chmod 0755 /opt/rescueos
+chmod -R 0755 /opt/rescueos/frontend
+chmod 0750 /opt/rescueos/backend
+# Backend JS files readable by rescueos group
+find /opt/rescueos/backend -type f -name '*.js' -exec chmod 0640 {} +
+find /opt/rescueos/backend -type f -name '*.json' -exec chmod 0640 {} +
+
+# --- Runtime data directory (writable by rescueos service) ---
+mkdir -p /var/lib/rescueos
+chown rescueos:rescueos /var/lib/rescueos
+chmod 0750 /var/lib/rescueos
+
+# --- Create symlink for node binary in PATH ---
+ln -sf "$NODE_BIN" /usr/local/bin/node
+ln -sf /usr/local/lib/nodejs/node-v22.14.0-linux-x64/bin/npm /usr/local/bin/npm
+
+# --- Enable services ---
+systemctl enable rescueos.service
+systemctl enable NetworkManager.service
+systemctl enable nftables.service
+
+# --- Make helper scripts executable ---
+chmod +x /usr/local/bin/rescueos-kiosk
+chmod +x /usr/local/bin/rescueos-session
+chmod +x /usr/local/bin/rescueos-hotspot
+chmod +x /usr/local/bin/rescueos-network
+
+# --- Set up nftables firewall rules ---
+cat > /etc/nftables.conf << 'NFTEOF'
+#!/usr/sbin/nft -f
+flush ruleset
+
+table inet rescueos_firewall {
+    chain input {
+        type filter hook input priority filter; policy drop;
+
+        # Loopback: allow all
+        iif lo accept
+
+        # Established/related connections
+        ct state established,related accept
+
+        # ICMP: allow ping
+        ip protocol icmp accept
+        ip6 nexthdr icmpv6 accept
+
+        # SSH (emergency admin access)
+        tcp dport 22 accept
+
+        # RescueOS application (HTTP on port 8080)
+        tcp dport 8080 accept
+
+        # DHCP server (for hotspot mode)
+        udp dport 67 accept
+        udp dport 68 accept
+
+        # DNS (for hotspot captive clients)
+        udp dport 53 accept
+        tcp dport 53 accept
+
+        # mDNS (local discovery)
+        udp dport 5353 accept
+
+        # Log and drop everything else
+        counter drop
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+        # NAT masquerade for hotspot clients
+        ct state established,related accept
+        iifname "wl*" oifname "eth*" accept
+        iifname "wl*" oifname "en*" accept
+    }
+
+    chain output {
+        type filter hook output priority filter; policy accept;
+    }
+}
+
+table ip rescueos_nat {
+    chain postrouting {
+        type nat hook postrouting priority srcnat;
+        # Masquerade hotspot traffic if upstream exists
+        oifname "eth*" masquerade
+        oifname "en*" masquerade
+    }
+}
+NFTEOF
+
+# --- Remove the XDG autostart entry (kiosk is launched by the xsession, not autostart) ---
+rm -f /etc/xdg/autostart/rescueos-kiosk.desktop
+
+# --- Configure Plymouth default theme ---
+if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+  plymouth-set-default-theme rescueos || true
+fi
+
+# --- Disable XFCE panel autostart (we use pure kiosk, no desktop) ---
+mkdir -p /etc/xdg/xfce4/xfconf/xfce-perchannel-xml
+cat > /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-session.xml << 'XFCEEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-session" version="1.0">
+  <property name="general" type="empty">
+    <property name="SaveOnExit" type="bool" value="false"/>
+  </property>
+  <property name="sessions" type="empty">
+    <property name="Failsafe" type="empty">
+      <property name="IsFailsafe" type="bool" value="true"/>
+      <property name="Count" type="int" value="0"/>
+    </property>
+  </property>
+</channel>
+XFCEEOF
+
+echo "=== RescueOS chroot hook complete ==="

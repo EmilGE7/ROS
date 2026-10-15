@@ -1,0 +1,341 @@
+{
+  "sos": [
+    {
+      "id": 6,
+      "name": "Ramesh Gupta",
+      "emergency": "Family stranded on rooftop by flash flood",
+      "people": 3,
+      "location": "House 44, Riverside Colony Sector B",
+      "priority": "CRITICAL",
+      "status": "RESOLVED",
+      "assigned_to": "Rescue Team 01 (Swiftwater)",
+      "created_at": "2026-10-10T06:13:16.779Z",
+      "updated_at": "2026-10-10T06:13:16.882Z"
+    },
+    {
+      "id": 5,
+      "name": "Pooja Nair",
+      "emergency": "Two pregnant women trapped in ground floor clinic as water entered premises.",
+      "people": 2,
+      "location": "Health Center 2, Sector B Lowlands",
+      "priority": "CRITICAL",
+      "status": "RESOLVED",
+      "assigned_to": "Rescue Team 01 (Swiftwater)",
+      "created_at": "2026-09-26T13:50:44.376Z",
+      "updated_at": "2026-09-26T15:05:44.376Z"
+    },
+    {
+      "id": 4,
+      "name": "Deepak Reddy",
+      "emergency": "Elderly apartment block cut off by road flooding. 8 residents without clean drinking water for 18 hours.",
+      "people": 8,
+      "location": "Block 4, Sunrise Apts, Sector B",
+      "priority": "HIGH",
+      "status": "IN_PROGRESS",
+      "assigned_to": "Rescue Team 02 (Urban Search)",
+      "created_at": "2026-09-26T14:40:44.376Z",
+      "updated_at": "2026-09-26T15:30:44.376Z"
+    },
+    {
+      "id": 3,
+      "name": "Farhan Akhtar",
+      "emergency": "Perimeter boundary wall collapsed onto neighborhood pathway. Power line down nearby, sparks visible.",
+      "people": 3,
+      "location": "Lane 3, North Hillside, Sector C",
+      "priority": "HIGH",
+      "status": "NEW",
+      "assigned_to": null,
+      "created_at": "2026-09-26T15:22:44.376Z",
+      "updated_at": "2026-09-26T15:22:44.376Z"
+    },
+    {
+      "id": 2,
+      "name": "Sunita Patel",
+      "emergency": "Severe head injury from falling brick debris during storm. Patient is semi-conscious and bleeding.",
+      "people": 1,
+      "location": "Near Market Cross, Sector A",
+      "priority": "CRITICAL",
+      "status": "NEW",
+      "assigned_to": null,
+      "created_at": "2026-09-26T15:12:44.376Z",
+      "updated_at": "2026-09-26T15:12:44.376Z"
+    },
+    {
+      "id": 1,
+      "name": "Rajesh Kumar & Family",
+      "emergency": "Flood water reached 4 feet on ground floor. Elderly grandmother and 2 children stranded on terrace.",
+      "people": 4,
+      "location": "Plot 14, Riverside Colony, Sector B",
+      "priority": "CRITICAL",
+      "status": "ASSIGNED",
+      "assigned_to": "Rescue Team 01 (Swiftwater)",
+      "created_at": "2026-09-26T14:58:44.376Z",
+      "updated_at": "2026-09-26T15:25:44.376Z"
+    }
+  ],
+  "volunteers": [
+    {
+      "id": 4,
+      "name": "Rescue Team 01 (Swiftwater)",
+      "status": "AVAILABLE"
+    },
+    {
+      "id": 5,
+      "name": "Rescue Team 02 (Urban Search)",
+      "status": "AVAILABLE"
+    }
+  ],
+  "shelters": [
+    {
+      "id": 1,
+      "name": "Central Relief Shelter (Indoor Stadium)",
+      "capacity": 200,
+      "occupancy": 87,
+      "water": 650,
+      "food": 480,
+      "medical_kits": 35
+    },
+    {
+      "id": 2,
+      "name": "North High School Evacuation Center",
+      "capacity": 250,
+      "occupancy": 230,
+      "water": 140,
+      "food": 110,
+      "medical_kits": 8
+    },
+    {
+      "id": 3,
+      "name": "Riverside Community Hall",
+      "capacity": 90,
+      "occupancy": 88,
+      "water": 40,
+      "food": 30,
+      "medical_kits": 2
+    }
+  ],
+  "announcements": [
+    {
+      "id": 7,
+      "title": "Boil Water Advisory - Sector B",
+      "message": "All residents boil drinking water for 3 minutes minimum.",
+      "priority": "HIGH",
+      "created_at": "2026-10-10T06:13:16.762Z"
+    },
+    {
+      "id": 3,
+      "title": "Volunteer Staging Point Active",
+      "message": "All registered civilian volunteers report to Central Shelter Logistics Staging Area for assignment briefings and safety gear issuance.",
+      "priority": "NORMAL",
+      "created_at": "2026-09-26T15:05:44.376Z"
+    },
+    {
+      "id": 2,
+      "title": "Boil Water Advisory - Sector B",
+      "message": "Municipal tap water supply is compromised due to floodwater inundation. DO NOT drink tap water without boiling for 3 minutes or using chlorine purification tablets distributed at shelters.",
+      "priority": "HIGH",
+      "created_at": "2026-09-26T14:50:44.376Z"
+    },
+    {
+      "id": 1,
+      "title": "EMERGENCY EVACUATION ORDER: SECTOR B LOWLANDS",
+      "message": "Water level rising at 15cm per hour. All residents living within 500 meters of the river must evacuate immediately to Central Relief Shelter or North High School. Avoid River Bridge.",
+      "priority": "CRITICAL",
+      "created_at": "2026-09-26T14:20:44.376Z"
+    }
+  ],
+  "audit": [
+    {
+      "id": 118,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-10-10T06:30:08.920Z"
+    },
+    {
+      "id": 117,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-10-10T06:17:48.303Z"
+    },
+    {
+      "id": 116,
+      "action": "SYNC_IMPORT",
+      "detail": "Imported 0 SOS, 0 Incidents, 0 Missing Persons",
+      "created_at": "2026-10-10T06:13:17.176Z"
+    },
+    {
+      "id": 115,
+      "action": "SYNC_EXPORT",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:17.154Z"
+    },
+    {
+      "id": 114,
+      "action": "SIMULATION_RESET",
+      "detail": "Cleared all simulation records and reset engine",
+      "created_at": "2026-10-10T06:13:17.142Z"
+    },
+    {
+      "id": 111,
+      "action": "MEDICAL_TRIAGE_UPDATE",
+      "detail": "RED_IMMEDIATE | STABILIZED",
+      "created_at": "2026-10-10T06:13:17.067Z"
+    },
+    {
+      "id": 110,
+      "action": "MEDICAL_CASE_CREATED",
+      "detail": "RED_IMMEDIATE",
+      "created_at": "2026-10-10T06:13:17.051Z"
+    },
+    {
+      "id": 109,
+      "action": "MISSING_STATUS",
+      "detail": "Sheltered safely at North High School",
+      "created_at": "2026-10-10T06:13:17.039Z"
+    },
+    {
+      "id": 108,
+      "action": "MISSING_REGISTERED",
+      "detail": "Central Market Sector A",
+      "created_at": "2026-10-10T06:13:17.014Z"
+    },
+    {
+      "id": 107,
+      "action": "INCIDENT_STATUS",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:16.995Z"
+    },
+    {
+      "id": 106,
+      "action": "INCIDENT_REPORTED",
+      "detail": "Power cable snapped across North Ring Road",
+      "created_at": "2026-10-10T06:13:16.982Z"
+    },
+    {
+      "id": 105,
+      "action": "RESOURCE_TX",
+      "detail": "50 Liters. New balance: 700",
+      "created_at": "2026-10-10T06:13:16.963Z"
+    },
+    {
+      "id": 104,
+      "action": "SHELTER_CHECKOUT",
+      "detail": "2 evacuees (checkout)",
+      "created_at": "2026-10-10T06:13:16.944Z"
+    },
+    {
+      "id": 103,
+      "action": "SHELTER_CHECKIN",
+      "detail": "5 evacuees (checkin)",
+      "created_at": "2026-10-10T06:13:16.918Z"
+    },
+    {
+      "id": 102,
+      "action": "SOS_STATUS",
+      "detail": "All 3 family members evacuated safely to Central Relief Shelter.",
+      "created_at": "2026-10-10T06:13:16.892Z"
+    },
+    {
+      "id": 101,
+      "action": "SOS_STATUS",
+      "detail": "Deployed Zodiac boat. Reached stranded residence.",
+      "created_at": "2026-10-10T06:13:16.849Z"
+    },
+    {
+      "id": 100,
+      "action": "TASK_ASSIGNED",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:16.832Z"
+    },
+    {
+      "id": 99,
+      "action": "SOS_CREATED",
+      "detail": "Family stranded on rooftop by flash flood",
+      "created_at": "2026-10-10T06:13:16.785Z"
+    },
+    {
+      "id": 98,
+      "action": "ANNOUNCEMENT",
+      "detail": "All residents boil drinking water for 3 minutes minimum.",
+      "created_at": "2026-10-10T06:13:16.768Z"
+    },
+    {
+      "id": 97,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:16.751Z"
+    },
+    {
+      "id": 96,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:16.695Z"
+    },
+    {
+      "id": 95,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:16.646Z"
+    },
+    {
+      "id": 94,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:16.598Z"
+    },
+    {
+      "id": 93,
+      "action": "LOGIN_FAILED",
+      "detail": "",
+      "created_at": "2026-10-10T06:13:16.548Z"
+    },
+    {
+      "id": 92,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-09-26T15:41:26.504Z"
+    },
+    {
+      "id": 91,
+      "action": "LOGIN_SUCCESS",
+      "detail": "",
+      "created_at": "2026-09-26T15:41:22.262Z"
+    },
+    {
+      "id": 90,
+      "action": "SHELTER_UPDATE",
+      "detail": "Resource stock replenished: 500L Water, 120 MREs",
+      "created_at": "2026-09-26T14:10:44.376Z"
+    },
+    {
+      "id": 89,
+      "action": "TASK_STATUS",
+      "detail": "Status updated to RESOLVED (Safe extraction)",
+      "created_at": "2026-09-26T15:05:44.376Z"
+    },
+    {
+      "id": 88,
+      "action": "TASK_ASSIGNED",
+      "detail": "Assigned to Rescue Team 01 (Swiftwater)",
+      "created_at": "2026-09-26T15:10:44.376Z"
+    },
+    {
+      "id": 87,
+      "action": "ANNOUNCEMENT",
+      "detail": "Issued CRITICAL evacuation order for Sector B",
+      "created_at": "2026-09-26T14:20:44.376Z"
+    },
+    {
+      "id": 86,
+      "action": "LOGIN",
+      "detail": "Administrator logged into emergency console",
+      "created_at": "2026-09-26T12:50:44.376Z"
+    },
+    {
+      "id": 85,
+      "action": "SYSTEM_BOOT",
+      "detail": "Offline Disaster OS core initialized on host network",
+      "created_at": "2026-09-26T12:40:44.376Z"
+    }
+  ]
+}

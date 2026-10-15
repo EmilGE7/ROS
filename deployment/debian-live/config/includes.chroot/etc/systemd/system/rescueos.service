@@ -1,0 +1,41 @@
+[Unit]
+Description=RescueOS Offline Emergency Coordination Server
+After=network.target local-fs.target
+Wants=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/rescueos/backend
+Environment=PORT=8080
+Environment=HOST=0.0.0.0
+Environment=NODE_ENV=production
+Environment=STATION_ID=RESCUEOS-LOCAL
+Environment=RESCUEOS_DATA_DIR=/var/lib/rescueos
+ExecStart=/usr/local/lib/nodejs/node-v22.14.0-linux-x64/bin/node /opt/rescueos/backend/server.js
+Restart=on-failure
+RestartSec=3
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+# Security: run as unprivileged dedicated user
+User=rescueos
+Group=rescueos
+
+# StateDirectory creates /var/lib/rescueos owned by rescueos:rescueos
+StateDirectory=rescueos
+ReadWritePaths=/var/lib/rescueos
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/rescueos
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rescueos
+
+[Install]
+WantedBy=multi-user.target

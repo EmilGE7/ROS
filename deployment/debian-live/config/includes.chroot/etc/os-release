@@ -1,0 +1,9 @@
+NAME="RescueOS"
+PRETTY_NAME="RescueOS Emergency Operating System"
+ID=rescueos
+ID_LIKE=debian
+VERSION="1.0"
+VERSION_ID="1.0"
+HOME_URL="http://rescueos.local"
+SUPPORT_URL="http://rescueos.local"
+BUG_REPORT_URL="http://rescueos.local"

@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=RescueOS
+Comment=RescueOS Emergency Interface
+Exec=/usr/local/bin/rescueos-session
+Type=Application

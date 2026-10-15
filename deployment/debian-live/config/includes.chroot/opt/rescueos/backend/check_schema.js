@@ -1,0 +1,20 @@
+const { DatabaseSync } = require('node:sqlite');
+const db = new DatabaseSync('rescueos.sqlite');
+const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+console.log('Tables:', tables.map(t => t.name).join(', '));
+const annCols = db.prepare("PRAGMA table_info(announcements)").all();
+console.log('Announcements cols:', annCols.map(c => c.name).join(', '));
+const missCols = db.prepare("PRAGMA table_info(missing_persons)").all();
+console.log('Missing cols:', missCols.map(c => c.name).join(', '));
+const sosCols = db.prepare("PRAGMA table_info(sos_requests)").all();
+console.log('SOS cols:', sosCols.map(c => c.name).join(', '));
+const chatCols = db.prepare("PRAGMA table_info(chat_messages)").all();
+console.log('Chat cols:', chatCols.map(c => c.name).join(', '));
+const incCols = db.prepare("PRAGMA table_info(incidents)").all();
+console.log('Incidents cols:', incCols.map(c => c.name).join(', '));
+// Count duplicates
+const dupCheck = db.prepare("SELECT title, COUNT(*) as cnt FROM announcements GROUP BY title").all();
+console.log('Ann duplicates:', JSON.stringify(dupCheck));
+const sosList = db.prepare("SELECT id, rescue_id, status, priority FROM sos_requests").all();
+console.log('SOS list:', JSON.stringify(sosList));
+db.close();

@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+lb config noauto \
+  --mode debian \
+  --distribution trixie \
+  --architectures amd64 \
+  --binary-image iso-hybrid \
+  --debian-installer none \
+  --archive-areas "main contrib non-free non-free-firmware" \
+  --apt-indices false \
+  --memtest none \
+  --bootappend-live "boot=live components quiet splash username=user hostname=rescueos locales=en_US.UTF-8 keyboard-layouts=us" \
+  --iso-application "RescueOS" \
+  --iso-publisher "RescueOS Emergency Systems" \
+  --iso-volume "RescueOS 1.0" \
+  "${@}"

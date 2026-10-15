@@ -1,0 +1,136 @@
+#!/bin/sh
+# RescueOS Network & Hotspot Management Utility
+# Provides a simple interface for managing network and hotspot functionality.
+set -eu
+
+PORT=8080
+
+show_status() {
+  echo "========================================================"
+  echo "  RescueOS Network Status"
+  echo "========================================================"
+  echo ""
+
+  # Show hostname
+  echo "Hostname: $(hostname)"
+  echo ""
+
+  # Show all IPv4 interfaces
+  echo "Network Interfaces:"
+  echo "-------------------"
+  ip -4 addr show | awk '/^[0-9]+:/ { iface=$2; gsub(/:/, "", iface) } /inet / { print "  " iface ": " $2 }'
+  echo ""
+
+  # Show WiFi status
+  echo "Wi-Fi Devices:"
+  echo "--------------"
+  nmcli -t -f DEVICE,TYPE,STATE device 2>/dev/null | awk -F: '$2 == "wifi" {print "  " $1 " (" $3 ")"}'
+  echo ""
+
+  # Show active connections
+  echo "Active Connections:"
+  echo "-------------------"
+  nmcli -t -f NAME,TYPE,DEVICE connection show --active 2>/dev/null | awk -F: '{print "  " $1 " [" $2 "] on " $3}'
+  echo ""
+
+  # RescueOS service status
+  echo "RescueOS Backend:"
+  echo "-----------------"
+  if systemctl is-active --quiet rescueos 2>/dev/null; then
+    echo "  Status: RUNNING"
+  else
+    echo "  Status: STOPPED"
+  fi
+
+  # Show access URLs
+  echo ""
+  echo "Access URLs for connected devices:"
+  echo "-----------------------------------"
+  ip -4 addr show | awk '/inet / && !/127.0.0.1/ { gsub(/\/.*/, "", $2); print "  http://" $2 ":'"$PORT"'" }'
+  echo "  http://127.0.0.1:$PORT (local)"
+  echo ""
+}
+
+start_hotspot() {
+  SSID="RESCUEOS-EMERGENCY"
+
+  echo "========================================================"
+  echo "  RescueOS Emergency Hotspot Setup"
+  echo "========================================================"
+  echo ""
+
+  # List available Wi-Fi interfaces
+  echo "Available Wi-Fi interfaces:"
+  nmcli -t -f DEVICE,TYPE,STATE device | awk -F: '$2 == "wifi" {print "  " $1 " (" $3 ")"}'
+  echo ""
+
+  # Require an actual Wi-Fi device; NetworkManager reports AP support on start.
+  WIFI_DEVS=$(nmcli -t -f DEVICE,TYPE device | awk -F: '$2 == "wifi" {print $1}')
+  if [ -z "$WIFI_DEVS" ]; then
+    echo "ERROR: No Wi-Fi interfaces found." >&2
+    echo "A Wi-Fi adapter is required to create a hotspot." >&2
+    exit 1
+  fi
+
+  printf "Wi-Fi interface to use (e.g., wlan0): "
+  read IFACE
+
+  # Validate interface exists
+  if ! printf '%s\n' "$WIFI_DEVS" | grep -Fxq -- "$IFACE"; then
+    echo "ERROR: '$IFACE' is not one of the detected Wi-Fi interfaces." >&2
+    exit 1
+  fi
+
+  echo ""
+  echo "Starting hotspot '$SSID' on interface '$IFACE'..."
+  # Let NetworkManager prompt without echoing or putting the secret in argv.
+  nmcli --ask device wifi hotspot ifname "$IFACE" ssid "$SSID"
+
+  echo ""
+  echo "========================================================"
+  echo "  Hotspot Active!"
+  echo "========================================================"
+  echo ""
+  echo "  SSID:     $SSID"
+  echo "  Password: configured in NetworkManager"
+  echo ""
+  echo "  Once connected, open in browser:"
+
+  # Get hotspot IP
+  sleep 2
+  HOTSPOT_IP=$(ip -4 addr show "$IFACE" 2>/dev/null | awk '/inet / { gsub(/\/.*/, "", $2); print $2 }')
+  if [ -n "$HOTSPOT_IP" ]; then
+    echo "  http://${HOTSPOT_IP}:$PORT"
+  else
+    echo "  http://<hotspot-ip>:$PORT"
+  fi
+  echo ""
+}
+
+stop_hotspot() {
+  echo "Stopping all hotspot connections..."
+  nmcli connection show --active | grep -i hotspot | awk '{print $1}' | while read conn; do
+    nmcli connection down "$conn" 2>/dev/null || true
+  done
+  echo "Hotspot stopped."
+}
+
+show_help() {
+  echo "RescueOS Network Management Utility"
+  echo ""
+  echo "Usage: rescueos-network <command>"
+  echo ""
+  echo "Commands:"
+  echo "  status    Show network status and access URLs"
+  echo "  hotspot   Start a Wi-Fi hotspot for nearby devices"
+  echo "  stop      Stop the active hotspot"
+  echo "  help      Show this help message"
+  echo ""
+}
+
+case "${1:-help}" in
+  status)   show_status ;;
+  hotspot)  start_hotspot ;;
+  stop)     stop_hotspot ;;
+  help|*)   show_help ;;
+esac
